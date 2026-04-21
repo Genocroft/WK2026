@@ -41,7 +41,7 @@ Het SQL-script maakt automatisch:
 - De database `wk_poule`
 - 5 tabellen: `users`, `pools`, `pool_members`, `matches`, `predictions`
 - 8 testwedstrijden
-
+ewr
 ### Stap 4: Database-verbinding controleren
 Open `includes/db.php` en controleer dat de inloggegevens kloppen. Voor XAMPP zijn de standaardwaarden al correct:
 ```php

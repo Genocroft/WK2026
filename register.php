@@ -21,6 +21,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =============================================================
     // TODO 1: VALIDATIE
     // =============================================================
+
+    if ($name === '') {
+        $errors[] = 'Name is required.';
+    } elseif (strlen($name) < 2) {
+        $errors[] = 'Not enough characters.';
+    }
+
+    if ($email === '') {
+        $errors[] = 'Email is required.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Invalid email.';
+    }
+
+    if ($password === '') {
+        $errors[] = 'Password is required.';
+    } elseif (strlen($password) < 6) {
+        $errors[] = 'Use 6 characters minimum';
+    }
+
+    if ($password !== $confirm) {
+        $errors[] = 'Password does not match';
+    }
     // Controleer of de velden correct zijn ingevuld en voeg eventuele
     // foutmeldingen toe aan de $errors array.
     //
