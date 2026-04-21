@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // aan de $errors array.
     //
     // Voorbeeld prepared statement:
-    //   $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-    //   $stmt->execute([$email]);
+    //   $stmt = $pdo->prepare("?");
+    //   $stmt->execute([$?]);
     //   if ($stmt->fetch()) { ... }
     // =============================================================
 
@@ -60,10 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //       $hashed = password_hash($password, PASSWORD_DEFAULT);
     //
     //  b) Voeg de gebruiker toe met een INSERT statement:
-    //       INSERT INTO users (name, email, password) VALUES (?, ?, ?)
+    //       INSERT INTO users (name, email, password) ???
     //
     //  c) Stuur de gebruiker door naar login.php met een succes-parameter:
-    //       header('Location: login.php?registered=1');
+    //       header('Location: ');
     //       exit;
     // =============================================================
 

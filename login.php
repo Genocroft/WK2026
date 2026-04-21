@@ -40,13 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Alleen uitvoeren als $errors nog leeg is.
     //
     //  a) Haal de gebruiker op uit de database op basis van e-mail:
-    //       $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    //       $stmt->execute([$email]);
+    //       $stmt = $pdo->prepare("");
+    //       $stmt->execute([$?]);
     //       $user = $stmt->fetch();
     //
     //  b) Controleer of de gebruiker bestaat EN of het wachtwoord klopt
     //     met password_verify():
-    //       if ($user && password_verify($password, $user['password'])) {
+    //       if ($user && password_verify($password, $user['?'])) {
     //           // login gelukt
     //       } else {
     //           $errors[] = 'Ongeldige inloggegevens.';
