@@ -10,6 +10,7 @@ if (isLoggedIn()) {
 
 $errors = [];
 $name   = '';
+$password = '';
 $email  = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($email === '') {
         $errors[] = 'Email is required.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Invalid email.';
+        $errors[] = 'This email is not valid';
     }
 
     if ($password === '') {
@@ -43,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($password !== $confirm) {
         $errors[] = 'Password does not match';
     }
+
     // Controleer of de velden correct zijn ingevuld en voeg eventuele
     // foutmeldingen toe aan de $errors array.
     //
@@ -61,6 +63,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =============================================================
     // TODO 2: CONTROLEER OF E-MAIL AL BESTAAT
     // =============================================================
+
+    $stmt = $pdo->prepare(
+        "SELECT id FROM users WHERE email = ?"
+    );
+    $stmt->execute([$email]);
+
+    if ($stmt->fetch()) {
+        $errors[] = "Dit email address is al in gebruik.";
+    }
     // Alleen uitvoeren als er nog geen fouten zijn.
     // Gebruik een prepared statement op de `users` tabel.
     // Als het e-mailadres al bestaat, voeg dan een foutmelding toe
@@ -76,6 +87,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =============================================================
     // TODO 3: GEBRUIKER OPSLAAN
     // =============================================================
+    if (empty($errors)){
+
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare(
+            "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
+        );
+        $stmt->execute([$name, $email, $hash]);
+        header('Location: login.php');
+        exit;
+    }
+}
     // Alleen uitvoeren als $errors nog leeg is.
     //
     //  a) Hash het wachtwoord met password_hash():
@@ -88,8 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //       header('Location: ');
     //       exit;
     // =============================================================
-
-}
 
 $pageTitle = 'Registreren';
 include __DIR__ . '/includes/header.php';

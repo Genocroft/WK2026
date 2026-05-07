@@ -33,10 +33,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //   }
     // =============================================================
 
+    if (empty($email) === '') {
+        $errors = 'vul alle velden in';
+    }
 
     // =============================================================
     // TODO 2: GEBRUIKER OPHALEN & WACHTWOORD VERIFIËREN
     // =============================================================
+    
+    if (empty($errors)) {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
+
+        header('Location: index.php');
+        exit;
+    } else {
+        $errors[] = 'Ongeldige inloggegevens.';
+    }
+}
+}
     // Alleen uitvoeren als $errors nog leeg is.
     //
     //  a) Haal de gebruiker op uit de database op basis van e-mail:
@@ -60,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =============================================================
     // TODO 3: SESSIE STARTEN
     // =============================================================
+
     // Als de login is geslaagd, sla dan het volgende op in de sessie:
     //   $_SESSION['user_id']    = $user['id'];
     //   $_SESSION['user_name']  = $user['name'];
@@ -69,8 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //   header('Location: index.php');
     //   exit;
     // =============================================================
-
-}
 
 $pageTitle = 'Inloggen';
 include __DIR__ . '/includes/header.php';
