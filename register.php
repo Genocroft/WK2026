@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$name, $email, $hash]);
         header('Location: login.php');
         exit;
-    }
+    }   
 }
     // Alleen uitvoeren als $errors nog leeg is.
     //

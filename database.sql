@@ -17,13 +17,13 @@ CREATE TABLE users (
 
 -- Poules
 CREATE TABLE pools (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    access_code VARCHAR(20) NOT NULL UNIQUE,
-    created_by INT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description VARCHAR(500),
+  access_code VARCHAR(8) NOT NULL,
+  created_by INT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE (access_code)
 );
 
 -- Koppeltabel: gebruikers in poules

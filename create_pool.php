@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db.php';
 
 requireLogin();
-$user = currentUser();
+$userCurrent = currentUser();
 
 // =================================================================
 // WAT MOET DIT BESTAND DOEN?
@@ -26,19 +26,30 @@ $user = currentUser();
 // foutmelding en mislukt de INSERT. Met een random code van 8 tekens
 // is de kans op botsing heel klein, maar bij duizenden poules niet nul.
 // =================================================================
-
-
-$errors      = [];
-$name        = '';
-$description = '';
-
+$errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name        = trim($_POST['name']        ?? '');
+
+
+    $name = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
+
+    if (mb_strlen($name) < 3) {
+        $errors[] = 'De naam moet minimaal 3 karakters hebben.';
+    }
+
+    if (mb_strlen($name) > 100) {
+        $errors[] = 'Maximaal 100 karakters lang.';
+    }
+
+    if (mb_strlen($description) > 500) {
+        $errors[] = 'Maximaal 500 karakters lang.';
+    }
 
     // =============================================================
     // TODO 1: VALIDATIE
     // =============================================================
+
+
     // Controleer of de ingevoerde gegevens kloppen:
     //  - $name mag niet leeg zijn en moet minimaal 3 tekens lang zijn.
     //  - $name mag maximaal 100 tekens lang zijn.
@@ -61,6 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =============================================================
     // TODO 2: UNIEKE TOEGANGSCODE GENEREREN
     // =============================================================
+
+    do {
+        $code = strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
+
+        $stmt = $pdo->prepare("SELECT * FROM pools WHERE access_code = ?");
+        $stmt->execute([$code]);
+        $codeExists = $stmt->fetch() !== false;
+    } while ($codeExists);
+
     // Alleen uitvoeren als $errors leeg is (validatie geslaagd).
     //
     // We willen een code van 8 tekens met alleen hoofdletters en cijfers.
@@ -99,6 +119,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // =============================================================
     // TODO 3: POULE OPSLAAN & AANMAKER TOEVOEGEN
     // =============================================================
+
+    try {
+        $pdo->beginTransaction();
+
+        $stmt = $pdo->prepare("INSERT INTO pools (name, description, access_code, created_by) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$name, $description, $code, $userCurrent['id']]);
+        $pool_id = (int)$pdo->lastInsertId();
+
+        $stmt = $pdo->prepare("INSERT INTO pool_members (pool_id, user_id) VALUES (?, ?)");
+        $stmt->execute([$pool_id, $userCurrent['id']]);
+
+        $pdo->commit();
+        header("Location: pool_detail.php?id=" . $pool_id);
+        exit;
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        $errors[] = "Er ging iets mis probeer het opnieuw.";
+    }
+
     // Alleen uitvoeren als $errors leeg is.
     //
     // Dit is een gevoelige stap: er moeten TWEE dingen in de database
@@ -153,9 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // BELANGRIJK: `exit;` na `header(...)` is essentieel! Anders blijft
     // de code na de redirect gewoon doorlopen en kan er gekke dingen gebeuren.
     // =============================================================
-
 }
-
 $pageTitle = 'Nieuwe poule';
 include __DIR__ . '/includes/header.php';
 ?>
@@ -174,14 +211,13 @@ include __DIR__ . '/includes/header.php';
                 <div class="form-group">
                     <label class="form-label" for="name">Naam van de poule</label>
                     <input type="text" id="name" name="name" class="form-input"
-                           value="<?= htmlspecialchars($name) ?>"
-                           placeholder="Bijv. Klas 4A - WK 2026" required>
+                        placeholder="Bijv. Klas 4A - WK 2026" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="description">Beschrijving (optioneel)</label>
                     <textarea id="description" name="description" class="form-textarea"
-                              placeholder="Waar gaat deze poule over?"><?= htmlspecialchars($description) ?></textarea>
+                        placeholder="Waar gaat deze poule over?"></textarea>
                 </div>
 
                 <div class="flex gap-2">

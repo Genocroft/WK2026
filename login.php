@@ -33,8 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //   }
     // =============================================================
 
-    if (empty($email) === '') {
-        $errors = 'vul alle velden in';
+    if (empty($email)) {
+        $errors[] = "Email is verplicht.";
+    }
+
+    if (empty($password)) {
+        $errors[] = "Password is verplicht.";
     }
 
     // =============================================================
